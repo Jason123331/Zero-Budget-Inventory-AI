@@ -66,6 +66,7 @@ graph TD
 
     %% Connect Auditor
     F --> Q
+```
 
 ## 🚀 Key Features & Logic
 
