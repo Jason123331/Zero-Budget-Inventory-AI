@@ -18,10 +18,10 @@ The following logic flow represents how the system processes raw data into actio
 ```mermaid
 graph TD
     subgraph Input_Layer [DATA INGESTION]
-        A[IMS.xlsx (Raw History)] -->|Parse Dates & Clean| B(Data Preprocessing)
+        A["IMS.xlsx (Raw History)"] -->|Parse Dates & Clean| B(Data Preprocessing)
         B -->|Identify Location Status| C{Status Check}
         C -->|New Location| D[Rookie Mode]
-        C -->|Est. Date < Today| E[Overdue Handling]
+        C -->|"Est. Date < Today"| E[Overdue Handling]
         C -->|Normal| F[Mature Mode]
     end
 
@@ -30,22 +30,22 @@ graph TD
         
         %% Forecasting Module
         F --> G[Forecast Engine]
-        G -->|Calculate EWMA / SES| H(Predicted Velocity)
+        G -->|"Calculate EWMA / SES"| H(Predicted Velocity)
         G -->|Sparse Data Penalty| I(Blind Spot Correction)
         
         %% Policy Module
         D --> J[Policy Engine]
         H --> J
         J -->|Category Constraints| K{Category Type}
-        K -->|Chips| L[Dynamic Cap (4 vs 8)]
-        K -->|Bakery/Choco| M[Safety Net Limits]
+        K -->|Chips| L["Dynamic Cap (4 vs 8)"]
+        K -->|"Bakery/Choco"| M[Safety Net Limits]
         
         %% Decision Logic
         J -->|Current Stock - Burn Rate| N[Replenishment Decision]
         N -->|Output| O(Qty to Carry)
         
         %% Feedback Loop
-        O --> P[Shadow Ledger (JSON)]
+        O --> P[Shadow Ledger JSON]
         P -->|Virtual Stock Tracking| B
     end
 
