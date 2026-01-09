@@ -1,30 +1,68 @@
-# Project AIRS: Automated Inventory Replenishment System
+# Zero-Budget Inventory AI (The "Micro-ERP")
 
-> **Zero-Budget ERP & Decision Engine for 200+ Vending Machines** > *Built with Python, Applied Mathematics, and Generative AI.*
+> **An autonomous, algorithm-driven inventory management system developed to optimize vending machine operations with zero recurring SaaS costs.**
 
-## Overview
-Project AIRS is a proprietary **Inventory Optimization System** architected to replace manual supply chain workflows. It acts as a "Decision Engine" for a network of **200+ vending machines**, automating the end-to-end process from data ingestion to route planning.
+## 📖 Overview
+Managing inventory for distributed retail points (vending machines) typically requires expensive ERP software or results in significant inefficiency via manual guessing.
 
-This project demonstrates the power of **AI-Augmented Development**—leveraging LLMs to rapidly translate complex Operations Research logic into enterprise-grade Python solutions.
+This project is a **Python-based "Micro-ERP"** built from scratch to solve the "Travelling Salesman Problem" of inventory: **What exactly should a driver carry to maximize sales while minimizing load and waste?**
 
-## Key Features
-- **Smart "Skip" Logic & Data Imputation:** The system calculates projected burn rates to actively recommend **skipping replenishment** (JIT) if stock suffices. It automatically injects **"Virtual Inventory Nodes"** (synthetic data) to bridge data gaps and maintain time-series continuity for the SES model.
-- **SKU Graveyard & Opportunity Cost Tracker:** Automatically identifies underperforming "Zombie SKUs" for replacement. Upon delisting, the system archives their historical performance (Sales Velocity) to quantify the **Opportunity Cost**, creating a baseline to validate if the new replacement product generates higher ROI.
-- **Prescriptive Advisor:** Analyzes sales velocity to recommend **Slot Expansion** (Planogram Optimization) and **Delisting**.
-- **Dynamic Cap Logic:** Implements **Asymmetric Loss Functions** to balance Stockout Risk vs. Spoilage Waste.
-- **Closed-Loop Efficiency Checker:** Automatically backtests forecast accuracy, calculating an "Efficiency Score" for every cycle.
-
-## Technology Stack
-- **Core Logic:** Python (Pandas, NumPy)
-- **Math Models:** Simple Exponential Smoothing (SES), Stochastic Processes, Z-Score Safety Stock
-- **Data Source:** Custom ETL Pipeline for Legacy ERP Data
-- **Output:** Automated Excel SOPs for Field Drivers
-
-## Impact
-- **30% Reduction in Driver Field Hours:** Streamlined physical replenishment via "Smart Skip" logic and binary SOPs, significantly cutting time spent on-site.
-- **60% Reduction** in weekly route planning man-hours.
-- **90%+ Service Level** maintained across the network.
-- **Zero IT Cost** implementation using open-source tools.
+It ingests raw historical data, applies **Exponential Smoothing (SES)** for demand forecasting, and uses a **Dynamic Policy Engine** to generate precise weekly replenishment plans.
 
 ---
-*Note: Sensitive proprietary data has been sanitized for this public demonstration.*
+
+## 🧠 System Architecture
+
+The following logic flow represents how the system processes raw data into actionable decisions:
+
+```mermaid
+graph TD
+    subgraph Input_Layer [DATA INGESTION]
+        A[IMS.xlsx (Raw History)] -->|Parse Dates & Clean| B(Data Preprocessing)
+        B -->|Identify Location Status| C{Status Check}
+        C -->|New Location| D[Rookie Mode]
+        C -->|Est. Date < Today| E[Overdue Handling]
+        C -->|Normal| F[Mature Mode]
+    end
+
+    subgraph Core_Engine [THE BRAIN]
+        direction TB
+        
+        %% Forecasting Module
+        F --> G[Forecast Engine]
+        G -->|Calculate EWMA / SES| H(Predicted Velocity)
+        G -->|Sparse Data Penalty| I(Blind Spot Correction)
+        
+        %% Policy Module
+        D --> J[Policy Engine]
+        H --> J
+        J -->|Category Constraints| K{Category Type}
+        K -->|Chips| L[Dynamic Cap (4 vs 8)]
+        K -->|Bakery/Choco| M[Safety Net Limits]
+        
+        %% Decision Logic
+        J -->|Current Stock - Burn Rate| N[Replenishment Decision]
+        N -->|Output| O(Qty to Carry)
+        
+        %% Feedback Loop
+        O --> P[Shadow Ledger (JSON)]
+        P -->|Virtual Stock Tracking| B
+    end
+
+    subgraph Audit_Layer [EFFICIENCY & INSIGHTS]
+        Q[Efficiency Checker] -->|Backtest Last Refill| R[Calculate Asymmetric Loss]
+        R -->|Over-Carry| S(Waste Score)
+        R -->|Under-Carry| T(Missed Sales Score)
+        
+        U[Operations Advisor] -->|Analyze Trends| V(Hot/Cold Alerts)
+    end
+
+    subgraph Output_Layer [ACTIONABLE INTELLIGENCE]
+        O --> W[Weekly_Plan.xlsx]
+        V --> W
+        S --> W
+        T --> W
+    end
+
+    %% Connect Auditor
+    F --> Q
