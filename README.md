@@ -37,7 +37,7 @@ graph TD
         D --> J[Policy Engine]
         H --> J
         J -->|Category Constraints| K{Category Type}
-        K -->|Chips| L["Dynamic Cap (4 vs 8)"]
+        K -->|Chips| L["Dynamic Cap (4 to 8)"]
         K -->|"Bakery/Choco"| M[Safety Net Limits]
         
         %% Decision Logic
